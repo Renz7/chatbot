@@ -22,8 +22,8 @@ def clone_module():
 
 def import_lib():
     sys.path.append(sad_talker_path)
-    python = sys.executable
-    os.system(f"{python} -m pip install -r {os.path.join(sad_talker_path, 'requirements.txt')}")
+    # python = sys.executable
+    # os.system(f"{python} -m pip install -r {os.path.join(sad_talker_path, 'requirements.txt')}")
 
 
 def prepare_sad_talker():

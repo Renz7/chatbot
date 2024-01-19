@@ -5,14 +5,14 @@
 Time    : 2023/12/30 16:37
 Author  : ren
 """
+import os
 
-from supports.facerander.script import prepare_sad_talker
+pwd = os.path.dirname(os.path.abspath(__file__))
+cfg_dir = os.path.join(pwd,"sad_talker/src/config")
 
-prepare_sad_talker()
 
+def face_rander(image: str, audio: str, **kwargs):
+    from src.gradio_demo import SadTalker
 
-async def face_rander(image: str, audio: str, **kwargs):
-    from supports.facerander.sad_talker.src.gradio_demo import SadTalker
-
-    sad_talker = SadTalker()
-    return sad_talker.test(source_image=image, driven_audio=audio, result_dir="./data/result", **kwargs)
+    sad_talker = SadTalker("./checkpoints",cfg_dir)
+    return sad_talker.test(source_image=image, driven_audio=audio, result_dir="./data/result", still_mode=True, **kwargs)

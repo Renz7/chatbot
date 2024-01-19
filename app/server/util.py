@@ -18,6 +18,7 @@ from fastapi import UploadFile
 from supports.asr import OpenAIASR
 from supports.chat import OpenAIChat
 from supports.tts import EdgeTTS
+from supports.facerander.util import face_rander
 
 ASR = OpenAIASR("base")
 TTS = EdgeTTS()
@@ -53,6 +54,17 @@ async def load_chatbot(uid):
                 CHAT_BOT_CACHE.popitem()
             CHAT_BOT_CACHE[uid] = bot
             return bot
+
+async def gen_talker(image:UploadFile,audio:UploadFile):
+    _, img_f = tempfile.mkstemp(suffix="."+image.filename.split(".")[-1])
+    _, audio_f = tempfile.mkstemp(suffix="."+audio.filename.split(".")[-1])
+    print(img_f,audio_f)
+    print(image.size,audio.size)
+    with open(img_f,"wb") as f:
+        f.write(await image.read())
+    with open(audio_f,"wb") as f:
+        f.write(await audio.read())
+    return face_rander(img_f,audio_f)
 
 
 @contextlib.contextmanager
