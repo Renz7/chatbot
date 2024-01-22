@@ -17,12 +17,17 @@ from fastapi import UploadFile
 
 from supports.asr import OpenAIASR
 from supports.chat import OpenAIChat
-from supports.tts import EdgeTTS
 from supports.facerander.util import face_rander
+from supports.tts import EdgeTTS
 
 ASR = OpenAIASR("base")
 TTS = EdgeTTS()
 TTS_DEF_VOCICE = "zh-CN-XiaoxiaoNeural"
+
+TTS_VOCICE_DICT = {
+    "male": "zh-CN-YunyangNeural",
+    "female": "zh-CN-XiaoxiaoNeural"
+}
 
 CHAT_BOT_CACHE = OrderedDict()
 bot_lock = asyncio.Lock()
@@ -37,9 +42,10 @@ async def asr(audio: UploadFile):
                 return ASR.transcribe(fname)
 
 
-async def tts(text):
+async def tts(text, gender):
+    voice = TTS_VOCICE_DICT.get(gender, TTS_DEF_VOCICE)
     with create_temp_file(delete=False) as fname:
-        await TTS.apredict(text, TTS_DEF_VOCICE, fname)
+        await TTS.apredict(text, voice, fname)
         return fname
 
 
@@ -55,16 +61,17 @@ async def load_chatbot(uid):
             CHAT_BOT_CACHE[uid] = bot
             return bot
 
-async def gen_talker(image:UploadFile,audio:UploadFile):
-    _, img_f = tempfile.mkstemp(suffix="."+image.filename.split(".")[-1])
-    _, audio_f = tempfile.mkstemp(suffix="."+audio.filename.split(".")[-1])
-    print(img_f,audio_f)
-    print(image.size,audio.size)
-    with open(img_f,"wb") as f:
+
+async def gen_talker(image: UploadFile, audio: UploadFile):
+    _, img_f = tempfile.mkstemp(suffix="." + image.filename.split(".")[-1])
+    _, audio_f = tempfile.mkstemp(suffix="." + audio.filename.split(".")[-1])
+    print(img_f, audio_f)
+    print(image.size, audio.size)
+    with open(img_f, "wb") as f:
         f.write(await image.read())
-    with open(audio_f,"wb") as f:
+    with open(audio_f, "wb") as f:
         f.write(await audio.read())
-    return face_rander(img_f,audio_f)
+    return face_rander(img_f, audio_f)
 
 
 @contextlib.contextmanager

@@ -320,8 +320,11 @@ class EdgeTTS:
 async def test():
     tts = EdgeTTS()
     TEXT = '''近日，苹果公司起诉高通公司，状告其未按照相关合约进行合作，高通方面尚未回应。这句话中“其”指的是谁？'''
-    VOICE = "zh-CN-XiaoxiaoNeural"
-    audio_file = tts.apredict(TEXT, VOICE)
+    # VOICE = "zh-CN-XiaoxiaoNeural"
+    VOICE = "zh-CN-YunyangNeural"
+    audio_file = await tts.apredict(TEXT, VOICE,"1.wav")
 
 
-test()
+if __name__ == '__main__':
+    import asyncio
+    asyncio.run(test())

@@ -5,16 +5,14 @@
 Time    : 2023/12/26 15:39
 Author  : ren
 """
-import os
 from typing import Optional
 
-from fastapi import FastAPI, WebSocket, Query, UploadFile, Depends, BackgroundTasks,Response 
-from starlette.requests import Request
+from fastapi import FastAPI, UploadFile, BackgroundTasks
 from starlette.responses import FileResponse, JSONResponse
 
 from app.model.user import User
 from app.server import util
-from app.server.util import load_chatbot,gen_talker
+from app.server.util import load_chatbot, gen_talker
 
 app = FastAPI(debug=True)
 
@@ -44,7 +42,7 @@ app = FastAPI(debug=True)
 
 
 @app.post("/communicate/{user}")
-async def communicate(user: str, audio: Optional[UploadFile], background: BackgroundTasks):
+async def communicate(user: str, audio: Optional[UploadFile], gender: str, background: BackgroundTasks):
     if not audio:
         # todo 返回默认语音文件
         return util.response_err("audio file required")
@@ -56,14 +54,14 @@ async def communicate(user: str, audio: Optional[UploadFile], background: Backgr
         print(f"LLM 回答 {answer}")
         if not answer:
             return ""
-        fname = await util.tts(answer)
+        fname = await util.tts(answer, gender)
         print(f"tts 结果 {fname}")
         # background.add_task(os.remove, fname)
         return FileResponse(path=fname)
 
 
 @app.post("/face_rander")
-async def face_rander(image:Optional[UploadFile],audio: Optional[UploadFile]):
+async def face_rander(image: Optional[UploadFile], audio: Optional[UploadFile]):
     if not image or not audio:
         return util.response_err("input file required")
     try:
@@ -71,7 +69,6 @@ async def face_rander(image:Optional[UploadFile],audio: Optional[UploadFile]):
         return FileResponse(result)
     except Exception:
         return JSONResponse({"err_msg": "请检查参数或稍后再试"}, status_code=500)
-        
 
 
 @app.post("login")
